@@ -13,6 +13,24 @@ export default class App extends Component {
     ]
   }
 
+  addComment = (comment) => {
+    const {comments} = this.state
+    comments.unshift(comment)
+    // 更新状态
+    this.setState({
+      comments
+    })
+  }
+
+  removeComment = (index) => {
+    const {comments} = this.state
+    comments.splice(index, 1)
+    // 更新状态
+    this.setState({
+      comments
+    })
+  }
+
   render() {
     const {comments} = this.state
     return (
@@ -27,8 +45,8 @@ export default class App extends Component {
           </div>
         </header>
         <div className="container">
-          <CommentAdd/>
-          <CommentList comments={comments}/>
+          <CommentAdd addComment={this.addComment}/>
+          <CommentList comments={comments} removeComment={this.removeComment}/>
         </div>
       </div>
     )
