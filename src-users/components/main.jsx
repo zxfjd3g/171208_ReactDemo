@@ -1,7 +1,5 @@
 import React, {Component} from 'react'
 import axios from 'axios'
-import PubSub from 'pubsub-js'
-
 //  问题: 需要知道父组件传入了一个新的prop值
 export default class  extends Component {
 
@@ -12,39 +10,40 @@ export default class  extends Component {
     errorMsg: ''  // 请求失败的提示文本
   }
 
-  componentDidMount () {
-    // 订阅消息(绑定事件监听)
-    PubSub.subscribe('search', (msg, searchName) => {
-      // 更新状态(请求中)
-      this.setState({
-        firstView: false,
-        loading: true,
-        users: [],
-        errorMsg: ''
-      })
-      // 发异步ajax请求
-      const url = `https://api.github.com/search/users?q=${searchName}`
-      axios.get(url)
-        .then(response => {
-          // 成功了, 更新状态(成功)
-          const users = response.data.items.map(item => ({
-            username: item.login,
-            avatarUrl: item.avatar_url,
-            url: item.html_url
-          }))
-          this.setState({
-            loading: false,
-            users
-          })
-        })
-        .catch(error => {
-          // 失败了, 更新状态(失败)
-          this.setState({
-            loading: false,
-            errorMsg: '请求失败'
-          })
-        })
+  componentWillReceiveProps (newProps) { // 父组件更新了searchName状态, 我们就需要发ajax请求
+    // this.props.searchName
+    const searchName = newProps.searchName
+    // 更新状态(请求中)
+    this.setState({
+      firstView: false,
+      loading: true,
+      users: [],
+      errorMsg: ''
     })
+    // 发异步ajax请求
+    const url = `https://api.github.com/search/users?q=${searchName}`
+    axios.get(url)
+      .then(response => {
+        // 成功了, 更新状态(成功)
+        const users = response.data.items.map(item => ({
+          username: item.login,
+          avatarUrl: item.avatar_url,
+          url: item.html_url
+        }))
+        this.setState({
+          loading: false,
+          users
+        })
+      })
+      .catch(error => {
+        // 失败了, 更新状态(失败)
+        this.setState({
+          loading: false,
+          errorMsg: '请求失败'
+        })
+      })
+
+
   }
 
   render () {
