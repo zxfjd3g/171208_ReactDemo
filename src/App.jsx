@@ -1,54 +1,58 @@
 import React, {Component} from 'react'
+import axios from 'axios'
 
-import CommentAdd from './components/comment-add/comment-add'
-import CommentList from './components/comment-list/comment-list'
 
 export default class App extends Component {
 
   state = {
-    comments: [
-      {name: 'Tom', content: 'React不简单'},
-      {name: 'Jack', content: 'ReactSO简单'},
-      {name: 'Bob', content: 'React还行吧'}
-    ]
+    repoName: '',
+    repoUrl: ''
   }
 
-  addComment = (comment) => {
-    const {comments} = this.state
-    comments.unshift(comment)
-    // 更新状态
-    this.setState({
-      comments
-    })
-  }
+  componentDidMount () {
+    // 执行异步ajax请求
+    const url = `https://api.github.com/search/repositories?q=r&sort=stars`
+    /*axios.get(url)
+      .then( (response) => {
+        console.log('success', response.data)
+        const result = response.data
+        const mostRepo = result.items[0]
+        const repoName = mostRepo.name
+        const repoUrl = mostRepo.html_url
+        // 更新状态
+        this.setState({
+          repoUrl,
+          repoName
+        })
+      })
+      .catch((error) => {
+        console.log('请求失败', error)
+      });*/
+    fetch(url).then((response) => {
+      return response.json()
+    }).then((data) => {
+      const mostRepo = data.items[0]
+      const repoName = mostRepo.name
+      const repoUrl = mostRepo.html_url
+      // 更新状态
+      this.setState({
+        repoUrl,
+        repoName
+      })
+    }).catch((e) => {
+      console.log(e)
+    });
 
-  removeComment = (index) => {
-    const {comments} = this.state
-    comments.splice(index, 1)
-    // 更新状态
-    this.setState({
-      comments
-    })
   }
 
   render() {
-    const {comments} = this.state
-    return (
-      <div>
-        <header className="site-header jumbotron">
-          <div className="container">
-            <div className="row">
-              <div className="col-xs-12">
-                <h1>请发表对React的评论</h1>
-              </div>
-            </div>
-          </div>
-        </header>
-        <div className="container">
-          <CommentAdd addComment={this.addComment}/>
-          <CommentList comments={comments} removeComment={this.removeComment}/>
-        </div>
-      </div>
-    )
+    const {repoName, repoUrl} = this.state
+    if(!repoName) {
+      return <h2>LOADING...</h2>
+    } else {
+      return (
+        <p>MOST Star repo is <a href={repoUrl}>{repoName}</a></p>
+      )
+    }
   }
 }
